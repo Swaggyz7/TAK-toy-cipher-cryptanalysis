@@ -1,13 +1,11 @@
 #include <stdio.h>
 
-
 int sBox[16] = {9, 11, 12, 4, 10, 1, 2, 6, 13, 7, 3, 8, 15, 14, 0, 5};
 int revSbox[16] = {14, 5, 6, 10, 3, 15, 7, 9, 11, 0, 4, 1, 2, 8, 13, 12};
 
 int approxTable[16][16];
 
-int applyMask(int value, int mask)
-{
+int applyMask(int value, int mask){
     int interValue = value & mask;
     int total = 0;
     
@@ -22,19 +20,17 @@ int applyMask(int value, int mask)
     return total;   
 }
 
-void findApprox()
-{
+void findApprox(){
     int c, d, e;
     
-    for(c = 1; c < 16; c++)                                         //output mask
-        for(d = 1; d < 16; d++)                                     //input mask
-            for(e = 0; e < 16; e++)                                 //input
+    for(c = 1; c < 16; c++)                                         
+        for(d = 1; d < 16; d++)                                     
+            for(e = 0; e < 16; e++)                                 
                 if (applyMask(e, d) == applyMask(sBox[e], c))
                     approxTable[d][c]++;    
 }
 
-void showApprox()
-{
+void showApprox(){
     printf("Strong Linear Approximations: \n");
     int c, d, e;
     for(c = 1; c < 16; c++)
@@ -45,8 +41,7 @@ void showApprox()
     printf("\n");
 }
 
-int roundFunc(int input, int subkey)
-{
+int roundFunc(int input, int subkey){
     return sBox[input ^ subkey]; 
 }
 
@@ -54,8 +49,7 @@ int knownP[500];
 int knownC[500];
 int numKnown = 0;
 
-void fillKnowns()
-{
+void fillKnowns(){
 
     int subKey1 = rand() % 16;
     int subKey2 = rand() % 16;
@@ -75,8 +69,7 @@ void fillKnowns()
         
 }
 
-void testKeys(int k1, int k2)
-{
+void testKeys(int k1, int k2){
     int c;
     for(c = 0; c < numKnown; c++)
         if (roundFunc(roundFunc(knownP[c], k1), k2) != knownC[c])    
@@ -85,8 +78,7 @@ void testKeys(int k1, int k2)
     printf("* ");
 }
 
-int main()
-{
+int main(){
     printf("JK's Linear Cryptanalysis Test Program\n");
     printf("-----------------------------------------------\n\n");
     
@@ -205,7 +197,5 @@ int main()
    
     }
 
-    printf("Brute Force:  Computations Total = %i\n", sofar1);
-    
-    while(1){}       
+    printf("Brute Force:  Computations Total = %i\n", sofar1);     
 }
