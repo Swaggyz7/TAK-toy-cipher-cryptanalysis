@@ -1,26 +1,31 @@
-//Jon King
-//Differential Cryptanalysis Toy Implementation
-
 #include <stdio.h>
 
 int sbox[16] = {3, 14, 1, 10, 4, 9, 5, 6, 8, 11, 15, 2, 13, 12, 0, 7};
 int sboxRev[16] = {14, 2, 11, 0, 4, 6, 7, 15, 8, 5, 3, 9, 13, 12, 1, 10};
 int chars[16][16];
 
+int knownP0[10000];
+int knownP1[10000];
+int knownC0[10000];
+int knownC1[10000];
 
-int roundFunc(int input, int key)
-{
+int goodP0, goodP1, goodC0, goodC1;
+
+int numPairs;
+
+int chardat0[16];
+int chardatmax = 0;
+
+int roundFunc(int input, int key){
     return sbox[key ^ input];
 }
 
-int encrypt(int input, int k0, int k1)
-{
+int encrypt(int input, int k0, int k1){
     int x0 = roundFunc(input, k0);
     return x0 ^ k1;
 }
 
-void findDiffs()
-{
+void findDiffs(){
     printf("\nCreating XOR differential table:\n");
 
     int c, d, e, f;
@@ -44,22 +49,7 @@ void findDiffs()
                 printf("  6/16:   %i --> %i\n", c, d);
 }
 
-int knownP0[10000];
-int knownP1[10000];
-int knownC0[10000];
-int knownC1[10000];
-
-int goodP0, goodP1, goodC0, goodC1;
-
-int numPairs;
-
-//int realk0, realk1;
-
-int chardat0[16];
-int chardatmax = 0;
-
-void genCharData(int indiff, int outdiff)
-{
+void genCharData(int indiff, int outdiff){
             printf("\nGenerating possible intermediate values based on differential(%i --> %i):\n", indiff, outdiff);
 
             chardatmax = 0;
@@ -77,19 +67,18 @@ void genCharData(int indiff, int outdiff)
             }
 }
 
-void genPairs(int indiff)
-{
+void genPairs(int indiff){
     printf("\nGenerating %i known pairs with input differential of %i.\n", numPairs, indiff);
 
-    int realk0 = rand() % 16;                                                       //Create random subkey0
-    int realk1 = rand() % 16;                                                       //Create random subkey0
+    int realk0 = rand() % 16;                                                       
+    int realk1 = rand() % 16;                                                       
 
     printf("  Real K0 = %i\n", realk0);
     printf("  Real K1 = %i\n", realk1);
 
 
     int c;
-    for(c = 0; c < numPairs; c++)                                               //Create plaintext pairs with XOR difference of indiff
+    for(c = 0; c < numPairs; c++)                                               
     {
         knownP0[c] = rand() % 16;
         knownP1[c] = knownP0[c] ^ indiff;
@@ -98,12 +87,11 @@ void genPairs(int indiff)
     }
 }
 
-void findGoodPair(int outdiff)
-{
+void findGoodPair(int outdiff){
     printf("\nSearching for good pair:\n");
     int c;
     for(c = 0; c < numPairs; c++)
-        if ((knownC0[c] ^ knownC1[c]) == outdiff)                               //Does the ciphertext pair fit the characteristic?
+        if ((knownC0[c] ^ knownC1[c]) == outdiff)                               
         {
             goodC0 = knownC0[c];
             goodC1 = knownC1[c];
@@ -115,8 +103,7 @@ void findGoodPair(int outdiff)
     printf("NO GOOD PAIR FOUND!\n");
 }
 
-int testKey(int testK0, int testK1)
-{
+int testKey(int testK0, int testK1){
     int c;
     int crap = 0;
     for(c = 0; c < numPairs; c++)
@@ -134,12 +121,11 @@ int testKey(int testK0, int testK1)
         return 0;
 }
 
-void crack()
-{
+void crack(){
     printf("\nBrute forcing reduced keyspace:\n");
 
     int f;
-    for(f = 0; f < chardatmax; f++)                                             //Test each possible value based on characteristic
+    for(f = 0; f < chardatmax; f++)                                            
     {
         int testK0 = chardat0[f] ^ goodP0;
         int testK1 = sbox[chardat0[f]] ^ goodC0;
@@ -151,19 +137,17 @@ void crack()
     }
 }
 
-int main()
-{
-    srand(time(NULL));                                                          //Randomize values per run
+int main(){
+    srand(time(NULL));                                                          
 
-    findDiffs();                                                                //Find some good differentials in the S-Boxes
+    findDiffs();                                                              
 
-    numPairs = 8;                                                               //Define number of known pairs
+    numPairs = 8;                                                              
 
-    genCharData(4, 7);                                                          //Find inputs that lead a certain characteristic
-    genPairs(4);                                                                //Generate chosen-plaintext pairs
-    findGoodPair(7);                                                            //Choose a known pair that satisfies the characteristic
-    crack();                                                                    //Use charData and "good pair" in find key
+    genCharData(4, 7);                                                          
+    genPairs(4);                                                               
+    findGoodPair(7);                                                           
+    crack();                                                                    
 
-    while(1){}
     return 0;
 }
